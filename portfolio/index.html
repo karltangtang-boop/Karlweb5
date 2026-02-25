@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karl's AI 作品集</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --neon-cyan: #00f5ff;
+      --neon-purple: #bf00ff;
+      --neon-pink: #ff006e;
+      --neon-green: #00ff88;
+      --dark-bg: #050510;
+      --card-bg: rgba(10, 10, 30, 0.85);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--dark-bg);
+      color: #e0e0ff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #vanta-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .hero-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      width: 130px;
+      height: 130px;
+    }
+
+    .avatar-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: conic-gradient(var(--neon-cyan), var(--neon-purple), var(--neon-pink), var(--neon-cyan));
+      animation: spin 3s linear infinite;
+      z-index: -1;
+    }
+
+    .avatar-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: conic-gradient(var(--neon-cyan), var(--neon-purple), var(--neon-pink), var(--neon-cyan));
+      filter: blur(10px);
+      opacity: 0.5;
+      animation: spin 3s linear infinite;
+      z-index: -2;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .avatar-emoji {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 3px solid var(--dark-bg);
+      background: linear-gradient(135deg, #1a1a3e, #0d0d2b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink), var(--neon-cyan));
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 4s ease infinite, glitch 8s infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes glitch {
+      0%, 90%, 100% { transform: translate(0); filter: none; }
+      92% { transform: translate(-2px, 1px); filter: hue-rotate(90deg); }
+      94% { transform: translate(2px, -1px); filter: hue-rotate(-90deg); }
+      96% { transform: translate(-1px, 2px); filter: none; }
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 3vw, 1.3rem);
+      color: rgba(200, 200, 255, 0.8);
+      letter-spacing: 1px;
+    }
+
+    .hero-sub span { color: var(--neon-green); font-weight: 600; }
+
+    .scroll-hint {
+      font-size: 0.85rem;
+      color: rgba(150, 150, 200, 0.6);
+      animation: bounce 2s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    .section { padding: 80px 0; }
+
+    .section-title {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 800;
+      margin-bottom: 48px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+      margin: 12px auto 0;
+      border-radius: 2px;
+      box-shadow: 0 0 12px var(--neon-cyan);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 245, 255, 0.15);
+      border-radius: 16px;
+      padding: 28px 24px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.06), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .card:hover::before { left: 100%; }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--neon-cyan);
+      box-shadow:
+        0 0 20px rgba(0, 245, 255, 0.3),
+        0 0 60px rgba(0, 245, 255, 0.1),
+        0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+    }
+
+    .badge-game {
+      background: rgba(0, 245, 255, 0.15);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0, 245, 255, 0.3);
+    }
+
+    .badge-live {
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--neon-green);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .card-icon {
+      display: block;
+      font-size: 2.4rem;
+      margin-bottom: 14px;
+      filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.4));
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: rgba(180, 180, 220, 0.75);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .card-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--neon-cyan);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(150, 150, 200, 0.5);
+      font-size: 0.85rem;
+      border-top: 1px solid rgba(0, 245, 255, 0.08);
+    }
+
+    @media (max-width: 600px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .section { padding: 60px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="vanta-bg"></div>
+
+<div class="container">
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="avatar-wrap">
+        <div class="avatar-emoji">🤖</div>
+      </div>
+      <h1 class="hero-title">Karl 的 AI 作品集</h1>
+      <p class="hero-sub">欢迎和我一起 <span>玩 AI</span> ~~</p>
+      <p class="scroll-hint">↓ 向下探索</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">🎮 我的 AI 游戏</h2>
+    <div class="cards-grid">
+
+      <a class="card" href="https://github.com/karltangtang-boop/Karlcrazyeight" target="_blank" rel="noopener">
+        <span class="card-badge badge-game">GAME</span>
+        <span class="card-icon">🃏</span>
+        <div class="card-title">卡牌游戏</div>
+        <div class="card-desc">经典卡牌对战，AI 驱动的智能对手，考验你的策略与运气。</div>
+        <div class="card-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          GitHub
+        </div>
+      </a>
+
+      <a class="card" href="https://github.com/karltangtang-boop/Karlcrazyeight" target="_blank" rel="noopener">
+        <span class="card-badge badge-game">GAME</span>
+        <span class="card-icon">➕</span>
+        <div class="card-title">求和游戏</div>
+        <div class="card-desc">数字益智挑战，快速计算与组合，训练你的数学直觉。</div>
+        <div class="card-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          GitHub
+        </div>
+      </a>
+
+      <a class="card" href="https://github.com/karltangtang-boop/Karl-the-Star-Vanguard" target="_blank" rel="noopener">
+        <span class="card-badge badge-game">GAME</span>
+        <span class="card-icon">🚀</span>
+        <div class="card-title">星际先锋</div>
+        <div class="card-desc">太空射击冒险，驾驶飞船穿越星际，击败外星入侵者。</div>
+        <div class="card-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          GitHub
+        </div>
+      </a>
+
+      <a class="card" href="https://karl-nova-defense-wvwn.vercel.app" target="_blank" rel="noopener">
+        <span class="card-badge badge-live">LIVE</span>
+        <span class="card-icon">🛡️</span>
+        <div class="card-title">新星防御</div>
+        <div class="card-desc">塔防策略游戏，部署防御工事，抵御源源不断的敌人进攻。</div>
+        <div class="card-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          立即游玩
+        </div>
+      </a>
+
+      <a class="card" href="https://github.com/karltangtang-boop/ColorChallenge" target="_blank" rel="noopener">
+        <span class="card-badge badge-game">GAME</span>
+        <span class="card-icon">🎨</span>
+        <div class="card-title">色彩敏感度挑战</div>
+        <div class="card-desc">测试你的色彩感知能力，找出微妙的颜色差异，挑战极限。</div>
+        <div class="card-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          GitHub
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>© 2026 Karl · Built with AI ✨</p>
+</footer>
+
+<script>
+  VANTA.BIRDS({
+    el: "#vanta-bg",
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    backgroundColor: 0x050510,
+    color1: 0x00f5ff,
+    color2: 0xbf00ff,
+    colorMode: "lerp",
+    birdSize: 1.2,
+    wingSpan: 28.00,
+    speedLimit: 4.00,
+    separation: 60.00,
+    alignment: 50.00,
+    cohesion: 50.00,
+    quantity: 3.00
+  });
+</script>
+
+</body>
+</html>
